@@ -12,6 +12,7 @@ const getUsers = (req, res) => {
 const getUserById = (req, res) => {
   const { userId } = req.params;
   User.findById(userId)
+    .orFail()
     .then((user) => res.send({ data: user }))
     .catch((err) => errorMessage(err, req, res));
 };
@@ -26,6 +27,7 @@ const addUser = (req, res) => {
 const updateProfile = (req, res) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about })
+    .orFail()
     .then((user) => res.send(user))
     .catch((err) => errorMessage(err, req, res));
 };
@@ -33,6 +35,7 @@ const updateProfile = (req, res) => {
 const updateAvatar = (req, res) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar })
+    .orFail()
     .then((user) => res.send(user))
     .catch((err) => errorMessage(err, req, res));
 };
