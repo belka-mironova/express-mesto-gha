@@ -37,7 +37,11 @@ const updateProfile = (req, res) => {
 
 const updateAvatar = (req, res) => {
   const { avatar } = req.body;
-  User.findByIdAndUpdate(req.user._id, { avatar })
+  User.findByIdAndUpdate(
+    req.user._id,
+    { avatar },
+    { new: true, runValidators: true },
+  )
     .orFail()
     .then((user) => res.send({ data: user }))
     .catch((err) => errorMessage(err, req, res));
