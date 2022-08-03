@@ -12,7 +12,7 @@ const errorMessage = (err, req, res) => {
     return;
   }
   if (err.name === 'DocumentNotFoundError') {
-    res.status(NOT_FOUND).send({ message: 'Пользователь/карточка не найдены' });
+    res.status(NOT_FOUND).send({ message: 'Пользователь или карточка не найдены' });
     return;
   }
 
