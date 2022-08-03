@@ -20,6 +20,7 @@ app.use((req, res, next) => {
 
 app.use('/users', userRoutes);
 app.use('/cards', cardRoutes);
+app.use((req, res) => res.status(404).send({ message: 'Страницы не существует' }));
 
 const { PORT = 3000 } = process.env;
 
