@@ -15,7 +15,7 @@ const addCard = (req, res) => {
 };
 
 const deleteCard = (req, res) => {
-  Card.findByIdAndRemove(req.params.id)
+  Card.findByIdAndRemove(req.params.cardId)
     .orFail()
     .then((card) => res.send({ data: card }))
     .catch((err) => errorMessage(err, req, res));
