@@ -1,11 +1,11 @@
 const express = require('express');
 const mongoose = require('mongoose');
 
-const { login, createUser } = require('./controller/users');
-const auth = require('./middlewares/auth');
+const { login, createUser } = require('./src/controller/users');
+const auth = require('./src/middlewares/auth');
 
-const { userRoutes } = require('./routes/users');
-const { cardRoutes } = require('./routes/cards');
+const { userRoutes } = require('./src/routes/users');
+const { cardRoutes } = require('./src/routes/cards');
 
 const app = express();
 
