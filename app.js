@@ -45,7 +45,7 @@ app.use('/users', userRoutes);
 app.use('/cards', cardRoutes);
 
 app.use(errors());
-app.use((req, res) => res.status(404).send({ message: 'Страницы не существует' }));
+app.use((req, res) => res.status(401).send({ message: 'Вы не авторизованы' }));
 
 const { PORT = 3000 } = process.env;
 
