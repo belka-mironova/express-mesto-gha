@@ -1,7 +1,8 @@
+const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../models/user');
 
-const { errorMessage } = require('../../utils/error');
+const { errorMessage } = require('../utils/error');
 
 const getUsers = (req, res) => {
   User.find({})
@@ -17,7 +18,7 @@ const getUserById = (req, res) => {
     .catch((err) => errorMessage(err, req, res));
 };
 
-const addUser = (req, res) => {
+const createUser = (req, res) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
@@ -55,10 +56,30 @@ const updateAvatar = (req, res) => {
     .catch((err) => errorMessage(err, req, res));
 };
 
+const login = (req, res) => {
+  const { email, password } = req.body;
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, 'super-secret-key', { expiresIn: '7d' });
+      res.send({ token });
+    })
+    .catch((err) => errorMessage(err, req, res));
+};
+
+const getUserInfo = (req, res) => {
+  const { userId } = req.user._id;
+  User.find(userId)
+    .orFail()
+    .then((user) => res.send({ data: user }))
+    .catch((err) => errorMessage(err, req, res));
+};
+
 module.exports = {
   getUsers,
   getUserById,
-  addUser,
+  createUser,
   updateProfile,
   updateAvatar,
+  login,
+  getUserInfo,
 };

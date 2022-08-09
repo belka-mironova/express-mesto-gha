@@ -5,7 +5,7 @@ const userRoutes = express.Router();
 
 userRoutes.get('/', userControllers.getUsers);
 userRoutes.get('/:userId', userControllers.getUserById);
-userRoutes.post('/', userControllers.addUser);
+userRoutes.get('/me', userControllers.getUserInfo);
 userRoutes.patch('/me', userControllers.updateProfile);
 userRoutes.patch('/me/avatar', userControllers.updateAvatar);
 

@@ -1,8 +1,11 @@
 const express = require('express');
 const mongoose = require('mongoose');
 
-const { userRoutes } = require('./src/routes/users');
-const { cardRoutes } = require('./src/routes/cards');
+const { login, createUser } = require('./controller/users');
+const auth = require('./middlewares/auth');
+
+const { userRoutes } = require('./routes/users');
+const { cardRoutes } = require('./routes/cards');
 
 const app = express();
 
@@ -10,16 +13,14 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {});
 
 app.use(express.json());
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: '62e902d9fcd9c43543e311fc',
-  };
+app.post('/signin', login);
+app.post('/signup', createUser);
 
-  next();
-});
+app.use(auth);
 
 app.use('/users', userRoutes);
 app.use('/cards', cardRoutes);
+
 app.use((req, res) => res.status(404).send({ message: 'Страницы не существует' }));
 
 const { PORT = 3000 } = process.env;
