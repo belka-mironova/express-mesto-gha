@@ -17,7 +17,7 @@ const errorMessage = (err, req, res) => {
     res.status(NOT_FOUND).send({ message: 'Пользователь или карточка не найдены' });
     return;
   }
-  if (err.name === 'DocumentNotFoundError') {
+  if (err.name === 'OverwriteModelError') {
     res.status(CONFLICT_ERROR).send({ message: 'Пользователь с таким email уже существует' });
     return;
   }
