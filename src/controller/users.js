@@ -62,14 +62,13 @@ const login = (req, res) => {
   return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' });
-      res.send({ token });
+      res.status(200).res.send({ token });
     })
     .catch((err) => errorMessage(err, req, res));
 };
 
 const getUserInfo = (req, res) => {
-  const { userId } = req.user._id;
-  User.find(userId)
+  User.findById(req.params.id)
     .orFail()
     .then((user) => res.send({ data: user }))
     .catch((err) => errorMessage(err, req, res));
