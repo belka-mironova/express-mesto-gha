@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../models/user');
+const { SALT_ROUND, JWT_SECRET } = require('../configs/index');
 
 const { errorMessage } = require('../utils/error');
 
@@ -23,7 +24,7 @@ const createUser = (req, res) => {
     name, about, avatar, email, password,
   } = req.body;
   bcrypt
-    .hash(password, 10)
+    .hash(password, SALT_ROUND)
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
@@ -60,7 +61,7 @@ const login = (req, res) => {
   const { email, password } = req.body;
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, 'super-secret-key', { expiresIn: '7d' });
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' });
       res.send({ token });
     })
     .catch((err) => errorMessage(err, req, res));
