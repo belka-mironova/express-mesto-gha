@@ -4,7 +4,6 @@ const { celebrate, Joi } = require('celebrate');
 const { errors } = require('celebrate');
 
 const { login, createUser } = require('./src/controller/users');
-const auth = require('./src/middlewares/auth');
 
 const { userRoutes } = require('./src/routes/users');
 const { cardRoutes } = require('./src/routes/cards');
@@ -38,8 +37,6 @@ app.post(
   }),
   createUser,
 );
-
-app.use(auth);
 
 app.use('/users', userRoutes);
 app.use('/cards', cardRoutes);
