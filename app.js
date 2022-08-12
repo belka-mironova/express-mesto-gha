@@ -4,6 +4,7 @@ const { celebrate, Joi } = require('celebrate');
 const { errors } = require('celebrate');
 
 const { login, createUser } = require('./src/controller/users');
+const auth = require('./src/middlewares/auth');
 
 const { userRoutes } = require('./src/routes/users');
 const { cardRoutes } = require('./src/routes/cards');
@@ -38,11 +39,12 @@ app.post(
   createUser,
 );
 
+app.use(auth);
+
 app.use('/users', userRoutes);
 app.use('/cards', cardRoutes);
 
 app.use(errors());
-app.use((req, res) => res.status(401).send({ message: 'Вы не авторизованы' }));
 
 const { PORT = 3000 } = process.env;
 
