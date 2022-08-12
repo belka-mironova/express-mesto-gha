@@ -2,6 +2,11 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../models/user');
 const { SALT_ROUND, JWT_SECRET } = require('../configs/index');
+const {
+  ConflictError,
+  NotFoundError,
+  UnauthorizedError,
+} = require('../errors');
 
 const { errorMessage } = require('../utils/error');
 
@@ -14,7 +19,9 @@ const getUsers = (req, res) => {
 const getUserById = (req, res) => {
   const { userId } = req.params;
   User.findById(userId)
-    .orFail()
+    .orFail(() => {
+      throw new NotFoundError(`There is no user with id ${req.params.id}`);
+    })
     .then((user) => res.send({ data: user }))
     .catch((err) => errorMessage(err, req, res));
 };
@@ -23,13 +30,20 @@ const createUser = (req, res) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
-  bcrypt
-    .hash(password, SALT_ROUND)
-    .then((hash) => User.create({
-      name, about, avatar, email, password: hash,
-    }))
-    .then(res.status(201))
-    .then((user) => res.send({ data: user }))
+
+  User.findOne({ email })
+    .then((user) => {
+      if (user) {
+        throw new ConflictError('User with this email already exists');
+      }
+      return bcrypt
+        .hash(password, SALT_ROUND)
+        .then((hash) => User.create({
+          name, about, avatar, email, password: hash,
+        }))
+        .then(res.status(201))
+        .then(() => res.send({ data: user }));
+    })
     .catch((err) => errorMessage(err, req, res));
 };
 
@@ -40,7 +54,9 @@ const updateProfile = (req, res) => {
     { name, about },
     { new: true, runValidators: true },
   )
-    .orFail()
+    .orFail(() => {
+      throw new NotFoundError(`There is no user with id ${req.params.id}`);
+    })
     .then((user) => res.send({ data: user }))
     .catch((err) => errorMessage(err, req, res));
 };
@@ -52,24 +68,39 @@ const updateAvatar = (req, res) => {
     { avatar },
     { new: true, runValidators: true },
   )
-    .orFail()
+    .orFail(() => {
+      throw new NotFoundError(`There is no user with id ${req.params.id}`);
+    })
     .then((user) => res.send({ data: user }))
     .catch((err) => errorMessage(err, req, res));
 };
 
 const login = (req, res) => {
   const { email, password } = req.body;
-  return User.findUserByCredentials(email, password)
+
+  User.findOne({ email })
+    .select('+password')
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' });
-      res.status(200).res.send({ token });
+      if (!user) {
+        throw new UnauthorizedError('There is no user with such email');
+      }
+      return bcrypt.compare(password, user.password)
+        .then((matched) => {
+          if (!matched) {
+            throw new UnauthorizedError('Email or password are incorrect');
+          }
+          const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' });
+          res.status(200).send({ token });
+        });
     })
     .catch((err) => errorMessage(err, req, res));
 };
 
 const getUserInfo = (req, res) => {
   User.findById(req.params.id)
-    .orFail()
+    .orFail(() => {
+      throw new NotFoundError(`There is no user with ${req.params.id}`);
+    })
     .then((user) => res.send({ data: user }))
     .catch((err) => errorMessage(err, req, res));
 };
