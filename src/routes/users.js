@@ -1,5 +1,6 @@
 const express = require('express');
 const userControllers = require('../controller/users');
+const { validateCardData } = require('../middlewares/validations');
 
 const userRoutes = express.Router();
 

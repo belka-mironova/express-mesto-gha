@@ -6,35 +6,43 @@ const {
   ForbiddenError,
 } = require('../errors');
 
-const getCards = (req, res) => {
+const getCards = (req, res, next) => {
   Card.find({})
     .then((cards) => res.send({ data: cards }))
-    .catch((err) => errorMessage(err, req, res));
+    .catch((err) => {
+      if (err.name === 'NotFoundError') {
+        next(new RequestError('Data is not found'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 const addCard = (req, res, next) => {
   const { name, link } = req.body;
   Card.create({ name, link, owner: req.user._id })
-    .then(res.status(201))
-    .then((card) => res.send({ data: card }))
+    .then((card) => res.status(201).send({ data: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new RequestError('Data is nor valid'));
+        next(new RequestError('Data is not valid'));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 
 const deleteCard = (req, res, next) => {
-  Card.findByIdAndRemove(req.params.cardId)
+  const { id } = req.params;
+  Card.findById(id)
     .orFail(() => {
-      throw new NotFoundError(`Thre is no cards with ${req.params.cardId}`);
+      throw new NotFoundError(`Thre is no cards with id ${req.params.cardId}`);
     })
     .then((card) => {
       if (!card.owner.equals(req.user._id)) {
         return next(new ForbiddenError('You can delete only your cards'));
       }
-      return res.send({ data: card });
+      return card.remove()
+        .then(() => res.send({ message: 'The card was deleted' }));
     })
     .catch(next);
 };

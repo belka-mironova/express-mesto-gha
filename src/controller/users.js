@@ -6,16 +6,22 @@ const {
   ConflictError,
   NotFoundError,
   UnauthorizedError,
+  RequestError,
 } = require('../errors');
 
 const { errorMessage } = require('../utils/error');
 
-const getUsers = (req, res) => {
+const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send({ data: users }))
-    .catch((err) => errorMessage(err, req, res));
+    .catch((err) => {
+      if (err.name === 'NotFoundError') {
+        next(new NotFoundError('Data is not found'));
+      } else {
+        next(err);
+      }
+    });
 };
-
 const getUserById = (req, res) => {
   const { userId } = req.params;
   User.findById(userId)
@@ -26,7 +32,7 @@ const getUserById = (req, res) => {
     .catch((err) => errorMessage(err, req, res));
 };
 
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
@@ -41,10 +47,17 @@ const createUser = (req, res) => {
         .then((hash) => User.create({
           name, about, avatar, email, password: hash,
         }))
-        .then(res.status(201))
-        .then(() => res.send({ data: user }));
-    })
-    .catch((err) => errorMessage(err, req, res));
+        .then(() => res.status(201).send({ data: user }))
+        .catch((err) => {
+          if (err.code === 11000) {
+            next(new ConflictError('User with this email already exists'));
+          } else if (err.name === 'ValidationError') {
+            next(new RequestError('Bad request'));
+          } else {
+            next(err);
+          }
+        });
+    });
 };
 
 const updateProfile = (req, res) => {
