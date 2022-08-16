@@ -9,8 +9,6 @@ const {
   RequestError,
 } = require('../errors');
 
-const { errorMessage } = require('../utils/error');
-
 const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send({ data: users }))
@@ -22,14 +20,20 @@ const getUsers = (req, res, next) => {
       }
     });
 };
-const getUserById = (req, res) => {
+const getUserById = (req, res, next) => {
   const { userId } = req.params;
   User.findById(userId)
     .orFail(() => {
       throw new NotFoundError(`There is no user with id ${req.params.id}`);
     })
     .then((user) => res.send({ data: user }))
-    .catch((err) => errorMessage(err, req, res));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new RequestError('Data is not valid'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 const createUser = (req, res, next) => {
@@ -60,7 +64,7 @@ const createUser = (req, res, next) => {
     });
 };
 
-const updateProfile = (req, res) => {
+const updateProfile = (req, res, next) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
@@ -71,10 +75,16 @@ const updateProfile = (req, res) => {
       throw new NotFoundError(`There is no user with id ${req.params.id}`);
     })
     .then((user) => res.send({ data: user }))
-    .catch((err) => errorMessage(err, req, res));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new RequestError('Data is not valid'));
+      } else {
+        next(err);
+      }
+    });
 };
 
-const updateAvatar = (req, res) => {
+const updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
@@ -85,10 +95,16 @@ const updateAvatar = (req, res) => {
       throw new NotFoundError(`There is no user with id ${req.params.id}`);
     })
     .then((user) => res.send({ data: user }))
-    .catch((err) => errorMessage(err, req, res));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new RequestError('Data is not valid'));
+      } else {
+        next(err);
+      }
+    });
 };
 
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
 
   User.findOne({ email })
@@ -106,16 +122,28 @@ const login = (req, res) => {
           res.status(200).send({ token });
         });
     })
-    .catch((err) => errorMessage(err, req, res));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new RequestError('Data is not valid'));
+      } else {
+        next(err);
+      }
+    });
 };
 
-const getUserInfo = (req, res) => {
+const getUserInfo = (req, res, next) => {
   User.findById(req.params.id)
     .orFail(() => {
       throw new NotFoundError(`There is no user with ${req.params.id}`);
     })
     .then((user) => res.send({ data: user }))
-    .catch((err) => errorMessage(err, req, res));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new RequestError('Data is not valid'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 module.exports = {

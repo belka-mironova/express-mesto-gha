@@ -1,5 +1,4 @@
 const Card = require('../models/card');
-const { errorMessage } = require('../utils/error');
 const {
   RequestError,
   NotFoundError,
@@ -47,7 +46,7 @@ const deleteCard = (req, res, next) => {
     .catch(next);
 };
 
-const setLike = (req, res) => {
+const setLike = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
@@ -57,10 +56,16 @@ const setLike = (req, res) => {
       throw new NotFoundError(`There is no card with id ${req.params.cardId}`);
     })
     .then((like) => res.send({ data: like }))
-    .catch((err) => errorMessage(err, req, res));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new RequestError('Data is not valid'));
+      } else {
+        next(err);
+      }
+    });
 };
 
-const deleteLike = (req, res) => {
+const deleteLike = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } },
@@ -70,7 +75,13 @@ const deleteLike = (req, res) => {
       throw new NotFoundError(`There is no card with id ${req.params.cardId}`);
     })
     .then((card) => res.send({ data: card }))
-    .catch((err) => errorMessage(err, req, res));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new RequestError('Data is not valid'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 module.exports = {
