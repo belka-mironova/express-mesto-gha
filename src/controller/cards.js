@@ -22,8 +22,8 @@ const addCard = (req, res, next) => {
   Card.create({ name, link, owner: req.user._id })
     .then((card) => res.status(201).send({ data: card }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(new RequestError('Data is not valid'));
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        next(new RequestError('Data is not valid or Bad request'));
       } else {
         next(err);
       }
@@ -57,8 +57,8 @@ const setLike = (req, res, next) => {
     })
     .then((like) => res.send({ data: like }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(new RequestError('Data is not valid'));
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        next(new RequestError('Data is not valid or Bad request'));
       } else {
         next(err);
       }
@@ -76,8 +76,8 @@ const deleteLike = (req, res, next) => {
     })
     .then((card) => res.send({ data: card }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(new RequestError('Data is not valid'));
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        next(new RequestError('Data is not valid or Bad request'));
       } else {
         next(err);
       }

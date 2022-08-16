@@ -28,8 +28,8 @@ const getUserById = (req, res, next) => {
     })
     .then((user) => res.send({ data: user }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(new RequestError('Data is not valid'));
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        next(new RequestError('Data is not valid or Bad request'));
       } else {
         next(err);
       }
@@ -55,7 +55,7 @@ const createUser = (req, res, next) => {
         .catch((err) => {
           if (err.code === 11000) {
             next(new ConflictError('User with this email already exists'));
-          } else if (err.name === 'ValidationError') {
+          } else if (err.name === 'ValidationError' || err.name === 'CastError') {
             next(new RequestError('Bad request'));
           } else {
             next(err);
@@ -76,8 +76,8 @@ const updateProfile = (req, res, next) => {
     })
     .then((user) => res.send({ data: user }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(new RequestError('Data is not valid'));
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        next(new RequestError('Data is not valid or Bad request'));
       } else {
         next(err);
       }
@@ -96,8 +96,8 @@ const updateAvatar = (req, res, next) => {
     })
     .then((user) => res.send({ data: user }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(new RequestError('Data is not valid'));
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        next(new RequestError('Data is not valid or Bad request'));
       } else {
         next(err);
       }
@@ -123,8 +123,8 @@ const login = (req, res, next) => {
         });
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(new RequestError('Data is not valid'));
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        next(new RequestError('Data is not valid or Bad request'));
       } else {
         next(err);
       }
@@ -138,8 +138,8 @@ const getUserInfo = (req, res, next) => {
     })
     .then((user) => res.send({ data: user }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(new RequestError('Data is not valid'));
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        next(new RequestError('Data is not valid or Bad request'));
       } else {
         next(err);
       }

@@ -16,5 +16,5 @@ app.use(errors());
 const { PORT = 3000 } = process.env;
 
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}`);
+  console.log(`App listening on port ${PORT}`);
 });
