@@ -42,7 +42,7 @@ const validateUserData = celebrate({
 
 const validateUserId = celebrate({
   params: Joi.object().keys({
-    id: Joi.string().length(24).hex(),
+    userId: Joi.string().length(24).hex(),
   }),
 });
 
