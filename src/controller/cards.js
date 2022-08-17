@@ -8,13 +8,7 @@ const {
 const getCards = (req, res, next) => {
   Card.find({})
     .then((cards) => res.send({ data: cards }))
-    .catch((err) => {
-      if (err.name === 'NotFoundError') {
-        next(new RequestError('Data is not found'));
-      } else {
-        next(err);
-      }
-    });
+    .catch(next);
 };
 
 const addCard = (req, res, next) => {

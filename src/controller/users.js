@@ -12,13 +12,7 @@ const {
 const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send({ data: users }))
-    .catch((err) => {
-      if (err.name === 'NotFoundError') {
-        next(new NotFoundError('Data is not found'));
-      } else {
-        next(err);
-      }
-    });
+    .catch(next);
 };
 const getUserById = (req, res, next) => {
   const { userId } = req.params;
@@ -40,27 +34,20 @@ const createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
-
-  User.findOne({ email })
-    .then((user) => {
-      if (user) {
-        throw new ConflictError('User with this email already exists');
+  bcrypt
+    .hash(password, SALT_ROUND)
+    .then((hash) => User.create({
+      name, about, avatar, email, password: hash,
+    }))
+    .then((userdata) => res.status(201).send({ data: userdata }))
+    .catch((err) => {
+      if (err.code === 11000) {
+        next(new ConflictError('User with this email already exists'));
+      } else if (err.name === 'ValidationError' || err.name === 'CastError') {
+        next(new RequestError('Bad request'));
+      } else {
+        next(err);
       }
-      return bcrypt
-        .hash(password, SALT_ROUND)
-        .then((hash) => User.create({
-          name, about, avatar, email, password: hash,
-        }))
-        .then(() => res.status(201).send({ data: user }))
-        .catch((err) => {
-          if (err.code === 11000) {
-            next(new ConflictError('User with this email already exists'));
-          } else if (err.name === 'ValidationError' || err.name === 'CastError') {
-            next(new RequestError('Bad request'));
-          } else {
-            next(err);
-          }
-        });
     });
 };
 
