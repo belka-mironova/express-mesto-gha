@@ -39,7 +39,8 @@ const createUser = (req, res, next) => {
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
-    .then((userdata) => res.status(201).send({ data: userdata }))
+    .then((user) => User.findOne({ _id: user._id }))
+    .then((user) => res.send(user))
     .catch((err) => {
       if (err.code === 11000) {
         next(new ConflictError('User with this email already exists'));
@@ -109,17 +110,11 @@ const login = (req, res, next) => {
           res.status(200).send({ token });
         });
     })
-    .catch((err) => {
-      if (err.name === 'ValidationError' || err.name === 'CastError') {
-        next(new RequestError('Data is not valid or Bad request'));
-      } else {
-        next(err);
-      }
-    });
+    .catch(next);
 };
 
 const getUserInfo = (req, res, next) => {
-  User.findById(req.params.id)
+  User.findById(req.user._id)
     .orFail(() => {
       throw new NotFoundError(`There is no user with ${req.params.id}`);
     })

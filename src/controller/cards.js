@@ -25,8 +25,8 @@ const addCard = (req, res, next) => {
 };
 
 const deleteCard = (req, res, next) => {
-  const { id } = req.params;
-  Card.findById(id)
+  const { cardId } = req.params;
+  Card.findById(cardId)
     .orFail(() => {
       throw new NotFoundError(`Thre is no cards with id ${req.params.cardId}`);
     })
